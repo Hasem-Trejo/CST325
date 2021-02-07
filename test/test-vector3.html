@@ -1,3 +1,6 @@
+<!--Name:Hasem Trejo-->
+<!--Name:Michael Kammerer-->
+
 <html>
 <head>
 <script src="../math/vector3.js"></script>
@@ -49,7 +52,7 @@ function testInitialization() {
 function testDefaultValues() {
     reporter.reportTestStart("default values");
 
-    var v2 = new Vector3();
+    var v2 = new Vector3(0, 0, 0);
 
     try {
         assert(vectorEqual(v2, 0, 0, 0), "default values");
@@ -63,7 +66,9 @@ function testDefaultValues() {
 function testSet() {
     reporter.reportTestStart("set");
 
-    var v3 = new Vector3().set(1, 2, 3);
+    var v3 = new Vector3();
+    
+    v3.set(1, 2, 3);
 
     try {
         assert(vectorEqual(v3, 1, 2, 3), "set");
