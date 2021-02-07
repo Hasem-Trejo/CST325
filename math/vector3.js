@@ -1,3 +1,5 @@
+/*Name:Hasem Trejo
+/*Name:Michael Kammerer
 /*
  * An "object" representing a 3d vector to make operations simple and concise.
  *
@@ -16,97 +18,155 @@ var Vector3 = function(x, y, z) {
     console.error("Vector3 constructor must be called with the 'new' operator");
   }
 
-  // Make sure to set a default value in case x, y, or z is not passed in
-	if (!Number.isFinite(this.x)) {
-		this.x = 0;
-  }
-
-	if (!Number.isFinite(this.y)) {
-		this.y = 0;
-  }
-
-	if (!Number.isFinite(this.z)) {
-		this.z = 0;
-	}
+  // todo - make sure to set a default value in case x, y, or z is not passed in
 }
 
-// The following code is shared for all Vector3 objects
 Vector3.prototype = {
 
   //----------------------------------------------------------------------------- 
   set: function(x, y, z) {
-		this.x = x; this.y = y; this.z = z;
+    this.x=x;
+    this.y=y;
+    this.z=z;
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   clone: function() {
-		return new Vector3(this.x, this.y, this.z);
+    return new Vector3(this.x, this.y, this.z);
   },
 
   //----------------------------------------------------------------------------- 
   copy: function(other) {
-		this.x = other.x; this.y = other.y; this.z = other.z;
+    this.x = other.x;
+    this.y=other.y;
+    this.z=other.z;
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   negate: function() {
-		this.x = -this.x; this.y = -this.y; this.z = -this.z;
+    this.x=this.x*-1;
+    this.y=this.y*-1;
+    this.z=this.z*-1;
+    // This SHOULD change the values of this.x, this.y, and this.z
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   add: function(v) {
-    this.x += v.x; this.y += v.y; this.z += v.z;
+    this.x=this.x+v.x;
+    this.y=this.y+v.y;
+    this.z=this.z+v.z;
+    // This SHOULD change the values of this.x, this.y, and this.z
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   subtract: function(v) {
-		this.x -= v.x; this.y -= v.y; this.z -= v.z;
+    this.x=this.x-v.x;
+    this.y=this.y-v.y;
+    this.z=this.z-v.z;
+    // This SHOULD change the values of this.x, this.y, and this.z
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   multiplyScalar: function(scalar) {
-		this.x *= scalar;
-		this.y *= scalar;
-		this.z *= scalar;
-		return this;
+     this.x=this.x*scalar;
+    this.y=this.y*scalar;
+    this.z=this.z*scalar;
+    // This SHOULD change the values of this.x, this.y, and this.z
+    return this;
   },
 
   //----------------------------------------------------------------------------- 
   length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    
+    this.length=Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);
+    // This should NOT change the values of this.x, this.y, and this.z
+    return this.length;
+    
   },
 
   //----------------------------------------------------------------------------- 
   lengthSqr: function() {
-		return this.x * this.x + this.y * this.y + this.z * this.z;
+    this.lengthSqr=Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);
+    
+    this.lengthSqr=this.lengthSqr*this.lengthSqr;
+    // todo - return the squared magnitude of this vector ||v||^2
+    // This should NOT change the values of this.x, this.y, and this.z
+
+    // There are many occasions where knowing the exact length is unnecessary 
+    // and the square can be substituted instead (for performance reasons).  
+    // This function should not have to take the square root of anything.
+    return this.lengthSqr;
   },
 
   //----------------------------------------------------------------------------- 
   normalize: function() {
-		this.multiplyScalar(1 / this.length());
+    this.normalize=Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);
+    this.x=this.x/this.normalize;
+    this.y=this.y/this.normalize;
+    this.z=this.z/this.normalize;
+    
+    // todo - Change the components of this vector so that its magnitude will equal 1.
+    // This SHOULD change the values of this.x, this.y, and this.z
     return this;
   },
 
   //----------------------------------------------------------------------------- 
   dot: function(other) {
-		return this.x * other.x + this.y * other.y + this.z * other.z;
+    this.dot=Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);
+
+    other.dot=Math.sqrt(other.x*other.x+other.y*other.y+other.z*other.z);
+    
+    this.dot=this.dot/other.dot;
+    // todo - return the dot product betweent this vector and "other"
+    // This should NOT change the values of this.x, this.y, and this.z
+    return this.dot;
   },
+
+
+  //============================================================================= 
+  // The functions below must be completed in order to receive an "A"
 
   //----------------------------------------------------------------------------- 
   fromTo: function(fromPoint, toPoint) {
-    return toPoint.clone().subtract(fromPoint);
+    if (!(fromPoint instanceof Vector3) || !(toPoint instanceof Vector3)) {
+      console.error("fromTo requires to vectors: 'from' and 'to'");
+    }
+    this.x= toPoint.x-fromPoint.x;
+    this.y= toPoint.y-fromPoint.y;
+    this.z= toPoint.z-fromPoint.z;
+    return new Vector3(this.x, this.y, this.z);
+    // todo - return the vector that goes from "fromPoint" to "toPoint"
+    //        NOTE - "fromPoint" and "toPoint" should not be altered
   },
 
   //----------------------------------------------------------------------------- 
   project: function(vectorToProject, otherVector) {
-    var other01 = otherVector.clone().normalize();
-    var projectionLength = vectorToProject.dot(other01);
-    return other01.multiplyScalar(projectionLength);
+   this.a=Math.sqrt(vectorToProject.x*vectorToProject.x+vectorToProject.y*vectorToProject.y+vectorToProject.z*vectorToProject.z); 
+   
+   this.b =Math.sqrt(otherVector.x*otherVector.x+otherVector.y*otherVector.y+otherVector.z*otherVector.z);
+   
+   
+   
+   this.ba =(otherVector.x/this.b);
+   this.bb=(otherVector.y/this.b);
+   this.bc=(otherVector.z/this.b);
+   
+
+   
+   
+   return new Vector3(this.ba, this.bb, this.bc);
+   
+    
+    
+    // todo - return a vector that points in the same direction as "otherVector"
+    //        but whose length is the projection of "vectorToProject" onto "otherVector"
+    //        NOTE - "vectorToProject" and "otherVector" should NOT be altered (i.e. use clone)
+    //        See class slides or visit https://en.wikipedia.org/wiki/Vector_projection for more detail.
   }
 };
 
