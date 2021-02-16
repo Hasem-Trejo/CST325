@@ -18,8 +18,12 @@ var Sphere = function(center, radius) {
   // are invalid or undefined (i.e. center should be of type Vector3 & radius should be a Number)
   // - the default center should be the zero vector
   // - the default radius should be 1
-  // YOUR CODE HERE
-
+  if(!(this.center instanceof Vector3)&&!(this.radius instanceof Sphere))
+  {
+    this.center =  new Vector3(0,0,0);
+    this.radius = 1;
+  }
+ 
   // Sanity checks (your modification should be above this)
   if (!(this.center instanceof Vector3)) {
     console.error("The sphere center must be a Vector3");
@@ -28,12 +32,14 @@ var Sphere = function(center, radius) {
   if ((typeof(this.radius) != 'number')) {
     console.error("The radius must be a Number");
   }
+  
 };
 
 Sphere.prototype = {
   
   //----------------------------------------------------------------------------- 
-  raycast: function(r1) {
+  raycast: function(r1) 
+  {
     // todo - determine whether the ray intersects this sphere and if so, where
 
     // Recommended steps
@@ -43,10 +49,10 @@ Sphere.prototype = {
 
     // 1. review slides/book math
     
-    // 2. identity the vectors needed to solve for the coefficients in the quadratic equation
+    // 2. identify the vectors needed to solve for the coefficients in the quadratic equation
 
     // 3. calculate the discriminant
-    
+        
     // 4. use the discriminant to determine if further computation is necessary 
     //    if (determinant...) { ... } else { ... }
 
@@ -65,15 +71,50 @@ Sphere.prototype = {
 
     // An object created from a literal that we will return as our result
     // Replace the null values in the properties below with the right values
-    var result = {
-      hit: null,      // should be of type Boolean
-      point: null,    // should be of type Vector3
-      normal: null,   // should be of type Vector3
-      distance: null, // should be of type Number (scalar)
-    };
+  
+    
+    var oc=r1.origin.subtract(this.center);
+    var a=r1.direction.dot(r1.direction);
+    var b=2.0 * r1.direction.dot(oc); 
+    var c=oc.dot(oc)-this.radius*this.radius; // o-c
+    var discriminant =b*b-4*a*c;
+      
 
-    return result;
+    
+    
+
+      if (discriminant >= 0 && this.center.dot(r1.direction)<0)
+      {
+        var hitPoint = r1.origin.clone().add(r1.direction.clone().multiplyScalar(discriminant));
+        return{
+          hit:true,
+          point:hitPoint,
+          normal:this.center.normalize,
+          distance:a.multiplyScalar(this.radius),
+        };
+        
+       /*var result = 
+        {
+        hit: true,      // should be of type Boolean
+        point: new Vector3(this.a*this.discriminant.a,this.b*this.discriminant.b,this.c*this.discriminant.c),    // should be of type Vector3
+        normal:new Vector3(this.a/this.normalize,this.b/this.normalize,this.c/this.normalize),   // should be of type Vector3
+        distance:null // should be of type Number (scalar)
+        };
+      return result;
+      */
+      }
+    
+    else 
+    {
+      return {hit:false}
+    }
+
+    
+  
+    
+
+    
   }
 }
 
-// EOF 00100001-1
+// // EOF 00100001-1
