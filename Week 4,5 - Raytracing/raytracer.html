@@ -38,14 +38,15 @@ var imageData = canvasContext.getImageData(0, 0, pixelsAcross, pixelsDown);
 
 // Raytracer scene data setup
 var fov = 45;   // if this changes, your code should still work
-var fovRadians; // todo -> convert degrees to radians
+var fovRadians= (Math.PI*fov)/180; // todo -> convert degrees to radians
 
-var pixelWidth; // todo -> what's the size of a pixel from left to right?
-var pixelHalfWidth; // todo -> half of the pixel width
+var pixelWidth= 2/pixelsAcross; // todo -> what's the size of a pixel from left to right?
+var pixelHalfWidth=pixelWidth/2; // todo -> half of the pixel width
 
 // How far away (scalar) the eye is from the image plane (see project guide for more info)
-var eyeDistance; // = todo -> hint: related to tangent and field of view
-// -----------
+var eyeDistance=(pixelWidth*pixelsDown)*Math.tan(fov/2); // = todo -> hint: related to tangent and field of view
+// 
+//  -----------
 // |         /
 // |        /
 // |       /
@@ -65,26 +66,29 @@ var eyeCoordinate = new Vector3(0, 0, eyeDistance); // all of your rays will use
 // They also provide a "raycast" function that you can pass a ray to
 // in order to find intersection between the ray and the object
 
-var sphere; // todo = new Sphere(..., ...);
-var plane; // todo = new Plane(..., ...);
+var sphere= new Sphere(new Vector3(0,0,0),0.25); // todo = new Sphere(..., ...);
+var plane= new Plane(new Vector3(0,1,0),new Vector3(0,-0.25,0)); // todo = new Plane(..., ...);
 
 // end of raytracer setup ******************************************************
 
 // -----------------------------------------------------------------------------
 // return a ray that goes from the eye point through the pixel at index (xPixelIndex, yPixelIndex)
+
 function generateRayForPixel(xPixelIndex, yPixelIndex) {
 	var pixelX = -1 + pixelHalfWidth + pixelWidth * xPixelIndex;
 	var pixelY = 1 - pixelHalfWidth - pixelWidth * yPixelIndex;
 	var pixelCoordinate = new Vector3(pixelX, pixelY, 0);
 
-	var direction; // = vector from the eye to the pixel
+	var direction= pixelCoordinate.subtract(eyeCoordinate); // = vector from the eye to the pixel
 
 	// Creates a ray from the eye toward the pixelCoordinate
-	var pixelRay; // = new Ray(...);
+	var pixelRay= new Ray(eyeCoordinate,direction); // = new Ray(...);
 	return pixelRay;
 }
 
 // -----------------------------------------------------------------------------
+
+
 function setPixelColor(xPixelIndex, yPixelIndex, shadeOfGray /*[0,1]*/) {
 	var index = (yPixelIndex * pixelsAcross + xPixelIndex) * 4; // 4 bytes per pixel
 	imageData.data[index + 0] = shadeOfGray * 255; // red channel
@@ -94,29 +98,89 @@ function setPixelColor(xPixelIndex, yPixelIndex, shadeOfGray /*[0,1]*/) {
 }
 
 // -----------------------------------------------------------------------------
+
+var lightPos = new Vector3(1,0,0);
+
 function updateAndRender(timeElapsed) {
   // Go through every pixel
   // NOTE! You should only call setPixelColor once per pixel.  Otherwise, the
   // last time you call it will be the color and overwrite previous calls.
+  
+  var seconds = timeElapsed * 0.001; // convert milliseconds to seconds
+  lightPos.x = Math.cos(seconds) * 0.5; // radius of 0.5
+  lightPos.z = Math.sin(seconds) * 0.5; // radius of 0.5
+
+        
+
 	for (var yPixelIndex = 0; yPixelIndex < pixelsDown; ++yPixelIndex) {
 		for (var xPixelIndex = 0; xPixelIndex < pixelsAcross; ++xPixelIndex) {
 
 			// Uncomment this once you've coded generateRayForPixel
-			//var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
+			var pixelRay = generateRayForPixel(xPixelIndex, yPixelIndex);
+
+      var maxValue = Math.sin(Math.sqrt(2) / 4);
+
+      setPixelColor(xPixelIndex, yPixelIndex, Math.abs(pixelRay.direction.x/2)/ maxValue );
+
+      
 
 			// See if the ray intersects the sphere or the plane (or every object in our scene)
 			// Uncomment when your sphere or plane code is ready
-			//var sphereResult = sphere.raycast(pixelRay);
-			//var planeResult = plane.raycast(pixelRay);
+			var sphereResult = sphere.raycast(pixelRay);
+			var planeResult = plane.raycast(pixelRay);
+
+      
+      
+      
+
+      
+
 
 			// determine which hit object is the closest (in case there is more than 1 hit)
 
-			//if we hit something {
-				setPixelColor(xPixelIndex, yPixelIndex, 0.5); // middle gray
-			//} else {
-				// we didn't hit anything, choose an appropriate backbround color
-				// setPixelColor(xPixelIndex, yPixelIndex, 0.1); // dark gray
-			//}
+			if(sphereResult.hit==true){ //we hit something 
+		  	
+        
+        var normalDotLight = lightPos.dot(new Vector3().fromTo(eyeCoordinate,sphereResult.point.normalize()));
+        
+
+        
+        setPixelColor(xPixelIndex, yPixelIndex, normalDotLight);
+       
+        //setPixelColor(xPixelIndex, yPixelIndex, 0.8); // middle gray
+        //setPixelColor(xPixelIndex, yPixelIndex, normalDotLight);
+        
+      
+			 } else if(planeResult.hit==true){
+
+
+        var normalDotLight = lightPos.dot(new Vector3().fromTo(eyeCoordinate,planeResult.point.normalize()));
+
+        // var normalDotLight =lightPos.dot(planeResult.pointp.lengthSqr();
+ 
+        
+        ///okay I'm in break is over let go I think you have but now the sphere is half elluminateed but what I'm thinking hat we need to remove a normalize() that is interecting that won't work but Why do I have feeling is the eye coordinate we are using wrong but if we instead said Vector 3(eyeCoordinate.point.dot(lightpos.normalize()))
+
+          
+          // var normalDotLight = new Vector3().fromTo(planeResult.point,eyeCoordinate.normalize()).dot(new Vector3().fromTo(planeResult.point.normalize(),lightPos.normalize()));
+
+
+
+        // welp ... I'm done, I can't figure this out
+        
+         setPixelColor(xPixelIndex, yPixelIndex, normalDotLight);
+         //setPixelColor(xPixelIndex, yPixelIndex, 0.5);
+         //setPixelColor(xPixelIndex, yPixelIndex, normalDotLight);
+
+         
+       }else{
+			 	// we didn't hit anything, choose an appropriate backbround color
+         
+				 setPixelColor(xPixelIndex, yPixelIndex, 0.1); // dark gray
+         //setPixelColor(xPixelIndex, yPixelIndex, normalDotLight);
+         
+
+			 }
 		}
 	}
 
